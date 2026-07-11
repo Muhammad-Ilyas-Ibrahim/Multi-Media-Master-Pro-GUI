@@ -1,0 +1,27 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# PyInstaller build output
+build/
+dist/
+*.spec
+
+# Installer / release output
+installer/
+Releases/
+EXE/
+
+# Runtime logs
+*.log
+app_debug.log
+
+# Local per-user config
+output_dir.txt
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

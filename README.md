@@ -1,0 +1,311 @@
+# Multi-Media-Master-Pro GUI v2.0 - User Guide
+
+## 📋 Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [System Requirements](#system-requirements)
+- [Installation](#installation)
+- [Building from Source](#building-from-source)
+- [Usage Guide](#usage-guide)
+- [Troubleshooting](#troubleshooting)
+- [FAQ](#faq)
+
+## 🎯 Overview
+
+Multi-Media-Master-Pro v2.0 is a professional, feature-rich GUI application for multimedia processing. Built with PyQt5, it provides an intuitive interface for video compression, image compression, audio extraction, format conversion, and screen recording.
+
+## ✨ Features
+
+### Core Functionality
+- **Video Compression**: Compress single videos or batch process multiple videos with three compression levels
+- **Image Compression**: Compress single images or batch process with quality control
+- **Audio Extraction**: Extract audio from video files in multiple formats (MP3, WAV, AAC, FLAC, OGG)
+- **Audio Conversion**: Convert audio files between different formats
+- **Image Conversion**: Convert images between different formats (JPG, PNG, BMP, GIF, WEBP, TIFF)
+- **Screen Recording**: Record your screen with FFmpeg
+
+### Advanced Features
+- **Three Compression Levels**: 
+  - Low: Best quality, larger file size (CRF 20 for video, Quality 95 for images)
+  - Medium: Balanced quality and size (CRF 25 for video, Quality 85 for images)
+  - High: Maximum compression, smaller file size (CRF 30 for video, Quality 70 for images)
+- **Real-time Progress Tracking**: Visual progress bars and status updates
+- **Operation Cancellation**: Stop long-running tasks at any time
+- **Batch Processing**: Process multiple files in a directory at once
+- **Format Conversion**: Change file extensions during compression
+- **Size Reporting**: Detailed file size reduction statistics
+- **CSV Reports**: Batch operations generate CSV files with compression statistics
+
+## 💻 System Requirements
+
+### Minimum Requirements
+- **Operating System**: Windows 7 or later (64-bit recommended)
+- **RAM**: 2 GB minimum, 4 GB recommended
+- **Storage**: 500 MB free space
+- **FFmpeg**: Must be available (included in distribution or separate installation)
+
+### Python Requirements (for building from source)
+- **Python**: 3.6 or higher
+- **PyQt5**: 5.15.0 or higher
+- **PyInstaller**: For building executables (optional)
+
+## 📦 Installation
+
+### Option 1: Using Pre-built Executable
+
+1. Download the latest release from the Releases folder
+2. Extract the ZIP file
+3. Ensure `ffmpeg.exe` is in the same folder as `MultiMediaMasterPro.exe`
+4. Double-click `MultiMediaMasterPro.exe` to run
+
+### Option 2: Running from Source
+
+1. **Install Python 3.6+** from [python.org](https://www.python.org/downloads/)
+
+2. **Install Dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Install FFmpeg**:
+   - Download from [ffmpeg.org](https://ffmpeg.org/download.html)
+   - Extract to a folder
+   - Add to PATH or place `ffmpeg.exe` in the project directory
+
+4. **Run the Application**:
+   ```bash
+   python MultiMediaMasterPro_GUI_v2.py
+   ```
+
+## 🔨 Building from Source
+
+### Prerequisites
+- Python 3.6 or higher
+- PyInstaller (will be installed automatically by build script)
+- icon.ico file (optional, for custom icon)
+
+### Building the Executable
+
+1. **Using the Build Script (Recommended)**:
+   ```bash
+   build.bat
+   ```
+   This script will:
+   - Check Python installation
+   - Install PyInstaller if needed
+   - Build the executable with icon support
+   - Include ffmpeg.exe in the distribution
+
+2. **Manual Build**:
+   ```bash
+   pip install pyinstaller
+   pyinstaller --name=MultiMediaMasterPro --onefile --windowed --noconsole --icon=icon.ico --add-data "ffmpeg.exe;." MultiMediaMasterPro_GUI_v2.py
+   ```
+
+3. **Output Location**:
+   - The executable will be in the `dist` folder
+   - Copy `ffmpeg.exe` to the same folder as the executable
+
+## 📖 Usage Guide
+
+### Video Compression
+
+1. Navigate to the **"🎥 Video Compression"** tab
+2. Click **"📁 Browse"** to select a video file
+3. Choose compression level:
+   - **Low**: Best quality (CRF 20, Audio 128k)
+   - **Medium**: Balanced (CRF 25, Audio 96k) - *Recommended*
+   - **High**: Maximum compression (CRF 30, Audio 64k)
+4. (Optional) Check **"Change file extension"** to convert format
+5. Click **"🚀 Compress Video"**
+6. Monitor progress in the progress bar
+7. Results show original size, compressed size, and reduction percentage
+
+### Batch Video Compression
+
+1. Go to **"📂 Batch Video Compression"** tab
+2. Select a directory containing video files
+3. Choose compression level and format options
+4. Click **"🚀 Compress All Videos"**
+5. Compressed files will be saved in a `_compressed` subdirectory
+6. A CSV report (`compression_data.csv`) will be generated with statistics
+
+### Image Compression
+
+1. Navigate to **"🖼️ Image Compression"** tab
+2. Select an image file
+3. Choose compression level:
+   - **Low**: Quality 95
+   - **Medium**: Quality 85 - *Recommended*
+   - **High**: Quality 70
+4. (Optional) Change file extension
+5. Click **"🚀 Compress Image"**
+
+### Audio Extraction
+
+1. Go to **"🎵 Audio Extraction"** tab
+2. Select a video file
+3. Choose output format (MP3, WAV, AAC, FLAC, OGG)
+4. Click **"🎵 Extract Audio"**
+5. Audio file will be saved in the same directory as the video
+
+### Audio Conversion
+
+1. Navigate to **"🔄 Audio Conversion"** tab
+2. Choose **Single File** or **Directory**
+3. Select file/directory
+4. Choose target format
+5. Click **"🔄 Convert Audio"**
+
+### Image Conversion
+
+1. Go to **"🖼️ Image Conversion"** tab
+2. Choose **Single File** or **Directory**
+3. Select file/directory
+4. Choose target format
+5. Click **"🖼️ Convert Images"**
+
+### Screen Recording
+
+1. Navigate to **"🎬 Screen Recording"** tab
+2. Select output directory for recordings
+3. Click **"🔴 Start Recording"**
+4. Click **"⏹️ Stop Recording"** when done
+5. Recording will be saved with timestamp in filename
+
+## 🔧 Troubleshooting
+
+### Application Won't Start
+
+**Problem**: Application fails to launch or shows error about FFmpeg
+
+**Solutions**:
+- Ensure `ffmpeg.exe` is in the same folder as the executable
+- Check that FFmpeg is properly installed and accessible
+- Try running from command line to see error messages
+
+### Compression Fails
+
+**Problem**: Compression operation fails or produces errors
+
+**Solutions**:
+- Verify input file is not corrupted
+- Check available disk space
+- Ensure file is not open in another application
+- Check FFmpeg installation: `ffmpeg -version`
+
+### Progress Bar Not Updating
+
+**Problem**: Progress bar doesn't show progress or stays at 0%
+
+**Solutions**:
+- Wait a moment - progress updates may be delayed
+- Check status label for operation status
+- For batch operations, progress updates per file
+
+### Widgets Overlapping
+
+**Problem**: UI elements overlap or are cut off
+
+**Solutions**:
+- Resize the window
+- Use scroll bars if available
+- Update to latest version (v2.0+ has fixed layouts)
+
+### Screen Recording Not Working
+
+**Problem**: Screen recording fails to start
+
+**Solutions**:
+- Ensure output directory is valid and writable
+- Check Windows permissions
+- Close other applications that might be using the screen capture
+
+## ❓ FAQ
+
+### Q: What video formats are supported?
+**A**: MP4, AVI, MKV, MOV, FLV, WMV and other formats supported by FFmpeg.
+
+### Q: What image formats are supported?
+**A**: JPG, JPEG, PNG, BMP, GIF, WEBP, TIFF, ICO.
+
+### Q: Can I compress files without losing quality?
+**A**: The "Low" compression level provides minimal quality loss while still reducing file size. For maximum quality preservation, consider using the original file.
+
+### Q: How long does compression take?
+**A**: Compression time depends on:
+- File size
+- Compression level
+- System performance
+- Video/image resolution
+
+Generally, expect 1-5 minutes for a typical video file.
+
+### Q: Can I cancel an operation?
+**A**: Yes! Click the **"❌ Cancel Operation"** button that appears during processing.
+
+### Q: Where are compressed files saved?
+**A**: 
+- Single file operations: Same directory as source file
+- Batch operations: New `_compressed` subdirectory in the source directory
+
+### Q: Does the application modify original files?
+**A**: No! Original files are never modified. Compressed/converted files are saved with new names (e.g., `filename_compressed.mp4`).
+
+### Q: Can I use this on Linux or macOS?
+**A**: The GUI is built for Windows, but the underlying Python code can be adapted. You would need to:
+- Install PyQt5
+- Use `ffmpeg` instead of `ffmpeg.exe`
+- Modify screen recording commands for your OS
+
+## 📝 File Structure
+
+```
+Multi-Media-Master-Pro/
+├── MultiMediaMasterPro_GUI_v2.py  # Main GUI application
+├── build.bat                       # Build script for executable
+├── icon.ico                        # Application icon
+├── ffmpeg.exe                      # FFmpeg binary (required)
+├── requirements.txt                # Python dependencies
+├── README_GUI.md                   # This file
+└── dist/                           # Build output folder
+    └── MultiMediaMasterPro.exe     # Compiled executable
+```
+
+## 🐛 Known Issues
+
+- Screen recording may not work on all Windows versions
+- Very large files (>2GB) may take significant time to process
+- Batch operations on directories with many files may take a while
+
+## 📄 License
+
+This project is provided as-is for educational and personal use.
+
+## 🤝 Support
+
+For issues, questions, or contributions:
+1. Check the Troubleshooting section
+2. Review error messages in the application
+3. Ensure all requirements are met
+4. Check FFmpeg installation
+
+## 🔄 Version History
+
+### v2.0 (Current)
+- Fixed widget overlapping issues
+- Improved progress bar functionality
+- Enhanced UI with scroll areas
+- Better error handling
+- Improved batch processing
+- CSV reports for batch operations
+
+### v1.1
+- Initial release
+- Basic compression features
+- Simple GUI interface
+
+---
+
+**Enjoy using Multi-Media-Master-Pro v2.0!** 🎉
+
