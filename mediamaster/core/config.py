@@ -6,7 +6,7 @@ import shutil
 import subprocess
 
 APP_NAME = "Multi-Media-Master-Pro"
-APP_VERSION = "1.2"
+APP_VERSION = "1.3"
 
 AUDIO_EXTS = (
     'aac', 'ac3', 'aif', 'aiff', 'alac', 'amr', 'ape', 'au', 'awb', 'flac',

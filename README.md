@@ -1,4 +1,4 @@
-# Multi-Media-Master-Pro GUI v1.2 - User Guide
+# Multi-Media-Master-Pro GUI - User Guide
 
 ## 📋 Table of Contents
 - [Overview](#overview)
@@ -7,12 +7,10 @@
 - [Installation](#installation)
 - [Building from Source](#building-from-source)
 - [Usage Guide](#usage-guide)
-- [Troubleshooting](#troubleshooting)
-- [FAQ](#faq)
 
 ## Overview
 
-Multi-Media-Master-Pro v1.2 is a professional, feature-rich GUI application for multimedia processing. Built with PyQt5, it provides an intuitive interface for video compression, image compression, audio extraction, format conversion, and screen recording.
+Multi-Media-Master-Pro is a professional, feature-rich GUI application for multimedia processing. Built with PyQt5, it provides an intuitive interface for video compression, image compression, audio extraction, format conversion, and screen recording.
 
 ## Features
 
@@ -181,91 +179,6 @@ Multi-Media-Master-Pro v1.2 is a professional, feature-rich GUI application for 
 4. Click **"⏹️ Stop Recording"** when done
 5. Recording will be saved with timestamp in filename
 
-## Troubleshooting
-
-### Application Won't Start
-
-**Problem**: Application fails to launch or shows error about FFmpeg
-
-**Solutions**:
-- Ensure `ffmpeg.exe` is in the same folder as the executable
-- Check that FFmpeg is properly installed and accessible
-- Try running from command line to see error messages
-
-### Compression Fails
-
-**Problem**: Compression operation fails or produces errors
-
-**Solutions**:
-- Verify input file is not corrupted
-- Check available disk space
-- Ensure file is not open in another application
-- Check FFmpeg installation: `ffmpeg -version`
-
-### Progress Bar Not Updating
-
-**Problem**: Progress bar doesn't show progress or stays at 0%
-
-**Solutions**:
-- Wait a moment - progress updates may be delayed
-- Check status label for operation status
-- For batch operations, progress updates per file
-
-### Widgets Overlapping
-
-**Problem**: UI elements overlap or are cut off
-
-**Solutions**:
-- Resize the window
-- Use scroll bars if available
-- Update to latest version (v1.2+ has fixed layouts)
-
-### Screen Recording Not Working
-
-**Problem**: Screen recording fails to start
-
-**Solutions**:
-- Ensure output directory is valid and writable
-- Check Windows permissions
-- Close other applications that might be using the screen capture
-
-## FAQ
-
-### Q: What video formats are supported?
-**A**: MP4, AVI, MKV, MOV, FLV, WMV and other formats supported by FFmpeg.
-
-### Q: What image formats are supported?
-**A**: JPG, JPEG, PNG, BMP, GIF, WEBP, TIFF, ICO.
-
-### Q: Can I compress files without losing quality?
-**A**: The "Low" compression level provides minimal quality loss while still reducing file size. For maximum quality preservation, consider using the original file.
-
-### Q: How long does compression take?
-**A**: Compression time depends on:
-- File size
-- Compression level
-- System performance
-- Video/image resolution
-
-Generally, expect 1-5 minutes for a typical video file.
-
-### Q: Can I cancel an operation?
-**A**: Yes! Click the **"❌ Cancel Operation"** button that appears during processing.
-
-### Q: Where are compressed files saved?
-**A**: 
-- Single file operations: Same directory as source file
-- Batch operations: New `_compressed` subdirectory in the source directory
-
-### Q: Does the application modify original files?
-**A**: No! Original files are never modified. Compressed/converted files are saved with new names (e.g., `filename_compressed.mp4`).
-
-### Q: Can I use this on Linux or macOS?
-**A**: The GUI is built for Windows, but the underlying Python code can be adapted. You would need to:
-- Install PyQt5
-- Use `ffmpeg` instead of `ffmpeg.exe`
-- Modify screen recording commands for your OS
-
 ## File Structure
 
 ```
@@ -300,30 +213,6 @@ Multi-Media-Master-Pro-GUI/
 
 This project is provided as-is for educational and personal use.
 
-## Support
-
-For issues, questions, or contributions:
-1. Check the Troubleshooting section
-2. Review error messages in the application
-3. Ensure all requirements are met
-4. Check FFmpeg installation
-
-## Version History
-
-### v1.2 (Current)
-- Fixed widget overlapping issues
-- Improved progress bar functionality
-- Enhanced UI with scroll areas
-- Better error handling
-- Improved batch processing
-- CSV reports for batch operations
-
-### v1.1
-- Initial release
-- Basic compression features
-- Simple GUI interface
-
 ---
 
-**Enjoy using Multi-Media-Master-Pro v1.2!** 🎉
-
+**Enjoy using Multi-Media-Master-Pro!** 🎉

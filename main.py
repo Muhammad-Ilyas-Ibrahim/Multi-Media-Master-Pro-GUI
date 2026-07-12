@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Multi-Media-Master-Pro v1.2 - Professional GUI (modular)
+Multi-Media-Master-Pro v1.3 - Professional GUI (modular)
 ========================================================
 Entry point. Run with:  python main.py
 
