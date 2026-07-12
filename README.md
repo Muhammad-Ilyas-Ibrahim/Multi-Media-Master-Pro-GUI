@@ -1,4 +1,4 @@
-# Multi-Media-Master-Pro GUI v2.0 - User Guide
+# Multi-Media-Master-Pro GUI v1.2 - User Guide
 
 ## 📋 Table of Contents
 - [Overview](#overview)
@@ -10,11 +10,11 @@
 - [Troubleshooting](#troubleshooting)
 - [FAQ](#faq)
 
-## 🎯 Overview
+## Overview
 
-Multi-Media-Master-Pro v2.0 is a professional, feature-rich GUI application for multimedia processing. Built with PyQt5, it provides an intuitive interface for video compression, image compression, audio extraction, format conversion, and screen recording.
+Multi-Media-Master-Pro v1.2 is a professional, feature-rich GUI application for multimedia processing. Built with PyQt5, it provides an intuitive interface for video compression, image compression, audio extraction, format conversion, and screen recording.
 
-## ✨ Features
+## Features
 
 ### Core Functionality
 - **Video Compression**: Compress single videos or batch process multiple videos with three compression levels
@@ -36,7 +36,7 @@ Multi-Media-Master-Pro v2.0 is a professional, feature-rich GUI application for 
 - **Size Reporting**: Detailed file size reduction statistics
 - **CSV Reports**: Batch operations generate CSV files with compression statistics
 
-## 💻 System Requirements
+## System Requirements
 
 ### Minimum Requirements
 - **Operating System**: Windows 7 or later (64-bit recommended)
@@ -49,35 +49,41 @@ Multi-Media-Master-Pro v2.0 is a professional, feature-rich GUI application for 
 - **PyQt5**: 5.15.0 or higher
 - **PyInstaller**: For building executables (optional)
 
-## 📦 Installation
+## Installation
 
-### Option 1: Using Pre-built Executable
+### Option 1: Using the Installer (Recommended)
 
-1. Download the latest release from the Releases folder
-2. Extract the ZIP file
-3. Ensure `ffmpeg.exe` is in the same folder as `MultiMediaMasterPro.exe`
-4. Double-click `MultiMediaMasterPro.exe` to run
+1. Download the latest installer (`MultiMediaMasterPro-GUI-Setup-vX.Y.exe`) from the [Releases page](https://github.com/Muhammad-Ilyas-Ibrahim/Multi-Media-Master-Pro-GUI/releases)
+2. Run the installer and follow the on-screen prompts
+3. Launch **Multi-Media-Master-Pro** from the Start Menu or the desktop shortcut
+
+> FFmpeg is bundled with the installer — no separate setup required.
 
 ### Option 2: Running from Source
 
 1. **Install Python 3.6+** from [python.org](https://www.python.org/downloads/)
 
-2. **Install Dependencies**:
+2. **Clone the repository**:
+   ```bash
+   git clone https://github.com/Muhammad-Ilyas-Ibrahim/Multi-Media-Master-Pro-GUI.git
+   cd Multi-Media-Master-Pro-GUI
+   ```
+
+3. **Install Dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Install FFmpeg**:
-   - Download from [ffmpeg.org](https://ffmpeg.org/download.html)
-   - Extract to a folder
-   - Add to PATH or place `ffmpeg.exe` in the project directory
+4. **Install FFmpeg**:
+   - `ffmpeg.exe` is already included in the repository (via Git LFS).
+   - If it is missing, download it from [ffmpeg.org](https://ffmpeg.org/download.html) and place `ffmpeg.exe` in the project root, or add it to your PATH.
 
-4. **Run the Application**:
+5. **Run the Application**:
    ```bash
-   python MultiMediaMasterPro_GUI_v2.py
+   python main.py
    ```
 
-## 🔨 Building from Source
+## Building from Source
 
 ### Prerequisites
 - Python 3.6 or higher
@@ -99,14 +105,16 @@ Multi-Media-Master-Pro v2.0 is a professional, feature-rich GUI application for 
 2. **Manual Build**:
    ```bash
    pip install pyinstaller
-   pyinstaller --name=MultiMediaMasterPro --onefile --windowed --noconsole --icon=icon.ico --add-data "ffmpeg.exe;." MultiMediaMasterPro_GUI_v2.py
+   pyinstaller --name=MultiMediaMasterPro --onedir --windowed --noconsole --icon=icon.ico ^
+       --add-data "ffmpeg.exe;." --collect-all PyQt5 --collect-all qtawesome ^
+       --hidden-import=PyQt5.QtMultimedia --hidden-import=PyQt5.QtMultimediaWidgets main.py
    ```
 
 3. **Output Location**:
-   - The executable will be in the `dist` folder
-   - Copy `ffmpeg.exe` to the same folder as the executable
+   - The application is built to `dist\MultiMediaMasterPro\` (one-folder build)
+   - `ffmpeg.exe` is bundled into that folder automatically
 
-## 📖 Usage Guide
+## Usage Guide
 
 ### Video Compression
 
@@ -173,7 +181,7 @@ Multi-Media-Master-Pro v2.0 is a professional, feature-rich GUI application for 
 4. Click **"⏹️ Stop Recording"** when done
 5. Recording will be saved with timestamp in filename
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Application Won't Start
 
@@ -210,7 +218,7 @@ Multi-Media-Master-Pro v2.0 is a professional, feature-rich GUI application for 
 **Solutions**:
 - Resize the window
 - Use scroll bars if available
-- Update to latest version (v2.0+ has fixed layouts)
+- Update to latest version (v1.2+ has fixed layouts)
 
 ### Screen Recording Not Working
 
@@ -221,7 +229,7 @@ Multi-Media-Master-Pro v2.0 is a professional, feature-rich GUI application for 
 - Check Windows permissions
 - Close other applications that might be using the screen capture
 
-## ❓ FAQ
+## FAQ
 
 ### Q: What video formats are supported?
 **A**: MP4, AVI, MKV, MOV, FLV, WMV and other formats supported by FFmpeg.
@@ -258,31 +266,41 @@ Generally, expect 1-5 minutes for a typical video file.
 - Use `ffmpeg` instead of `ffmpeg.exe`
 - Modify screen recording commands for your OS
 
-## 📝 File Structure
+## File Structure
 
 ```
-Multi-Media-Master-Pro/
-├── MultiMediaMasterPro_GUI_v2.py  # Main GUI application
-├── build.bat                       # Build script for executable
-├── icon.ico                        # Application icon
-├── ffmpeg.exe                      # FFmpeg binary (required)
-├── requirements.txt                # Python dependencies
-├── README_GUI.md                   # This file
-└── dist/                           # Build output folder
-    └── MultiMediaMasterPro.exe     # Compiled executable
+Multi-Media-Master-Pro-GUI/
+├── main.py                     # Entry point (run this)
+├── mediamaster/                # Application package
+│   ├── core/                   # Backend layer
+│   │   ├── config.py           # Constants, paths, FFmpeg discovery, helpers
+│   │   └── worker.py           # Background FFmpeg thread (all tasks)
+│   └── ui/                     # Presentation layer
+│       ├── icons.py            # Font Awesome icon helpers
+│       ├── theme.py            # Light/dark palettes + stylesheet
+│       ├── widgets.py          # Reusable form widgets
+│       ├── timeline.py         # Scrubbable trim timeline
+│       ├── trim_studio.py      # Media-player trim page
+│       └── main_window.py      # Main window
+├── build.bat                   # Local build script
+├── icon.ico                    # Application icon
+├── ffmpeg.exe                  # FFmpeg binary (bundled via Git LFS)
+├── requirements.txt            # Python dependencies
+├── README.md                   # This file
+└── .github/workflows/          # CI: builds the exe + installer and publishes a release
 ```
 
-## 🐛 Known Issues
+## Known Issues
 
 - Screen recording may not work on all Windows versions
 - Very large files (>2GB) may take significant time to process
 - Batch operations on directories with many files may take a while
 
-## 📄 License
+## License
 
 This project is provided as-is for educational and personal use.
 
-## 🤝 Support
+## Support
 
 For issues, questions, or contributions:
 1. Check the Troubleshooting section
@@ -290,9 +308,9 @@ For issues, questions, or contributions:
 3. Ensure all requirements are met
 4. Check FFmpeg installation
 
-## 🔄 Version History
+## Version History
 
-### v2.0 (Current)
+### v1.2 (Current)
 - Fixed widget overlapping issues
 - Improved progress bar functionality
 - Enhanced UI with scroll areas
@@ -307,5 +325,5 @@ For issues, questions, or contributions:
 
 ---
 
-**Enjoy using Multi-Media-Master-Pro v2.0!** 🎉
+**Enjoy using Multi-Media-Master-Pro v1.2!** 🎉
 
