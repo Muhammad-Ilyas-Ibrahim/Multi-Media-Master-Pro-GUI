@@ -203,16 +203,16 @@ Multi-Media-Master-Pro-GUI/
 └── .github/workflows/          # CI: builds the exe + installer and publishes a release
 ```
 
-## Known Issues
-
-- Screen recording may not work on all Windows versions
-- Very large files (>2GB) may take significant time to process
-- Batch operations on directories with many files may take a while
-
 ## License
 
-This project is provided as-is for educational and personal use.
+This project is licensed under the **MIT License**.
 
----
+See the [LICENSE](LICENSE) file for more information.
 
-**Enjoy using Multi-Media-Master-Pro!** 🎉
+## Contributing
+
+Contributions are welcome! 
+
+The **Audio/Video Trimming** feature is still being improved and contributions related to its functionality, performance and usability are especially appreciated.
+
+Feel free to open an issue or submit a pull request.
