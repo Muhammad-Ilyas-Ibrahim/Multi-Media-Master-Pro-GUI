@@ -20,7 +20,12 @@ Multi-Media-Master-Pro is a professional, feature-rich GUI application for multi
 - **Audio Extraction**: Extract audio from video files in multiple formats (MP3, WAV, AAC, FLAC, OGG)
 - **Audio Conversion**: Convert audio files between different formats
 - **Image Conversion**: Convert images between different formats (JPG, PNG, BMP, GIF, WEBP, TIFF)
-- **Screen Recording**: Record your screen with FFmpeg
+- **Screen Recording**: Record your screen with FFmpeg, optionally with audio from a
+  microphone you pick (any Windows recording input, including "Stereo Mix")
+- **Trim & Preview**: Play any video or audio file FFmpeg can decode, scrub a zoomable
+  filmstrip/waveform timeline, mark in/out points and export the clip, either as a
+  lossless fast copy or a frame-exact re-encode, optionally converting the format
+  (e.g. save a video clip's sound as MP3)
 
 ### Advanced Features
 - **Three Compression Levels**: 
@@ -29,10 +34,23 @@ Multi-Media-Master-Pro is a professional, feature-rich GUI application for multi
   - High: Maximum compression, smaller file size (CRF 30 for video, Quality 70 for images)
 - **Real-time Progress Tracking**: Visual progress bars and status updates
 - **Operation Cancellation**: Stop long-running tasks at any time
-- **Batch Processing**: Process multiple files in a directory at once
+- **Batch Processing**: Tick "Batch" on Compress, Extract or Convert to process every file in a folder
 - **Format Conversion**: Change file extensions during compression
 - **Size Reporting**: Detailed file size reduction statistics
 - **CSV Reports**: Batch operations generate CSV files with compression statistics
+- **Every Format FFmpeg Reads**: Inputs accept ~360 video, audio and image extensions
+  (RMVB, VOB, MXF, TTA, WavPack, EXR, JPEG XL, AVIF, tracker modules, game audio, ...).
+  A file with an unfamiliar extension is identified by FFmpeg itself, and the app says
+  what it is, or that FFmpeg can't read it. Sources whose container FFmpeg can't write
+  are saved as MP4 / MP3 / JPEG instead
+- **Drag and Drop**: Drop files or folders on a page's source area, or anywhere in the
+  window; files the current page can't use open on the page that fits them
+- **Responsive Layout**: The sidebar collapses to an icon rail on narrow windows, control
+  rows wrap, and the UI scales cleanly at 100-200% Windows display scaling
+- **Light and Dark Themes**
+
+**Trim & Preview shortcuts**: Space play/pause · I / O set in/out · Left/Right step a
+frame (Shift: one second) · Home/End go to in/out · M mute · +/- zoom · Ctrl+O open
 
 ## System Requirements
 
@@ -187,13 +205,17 @@ Multi-Media-Master-Pro-GUI/
 ├── mediamaster/                # Application package
 │   ├── core/                   # Backend layer
 │   │   ├── config.py           # Constants, paths, FFmpeg discovery, helpers
+│   │   ├── media.py            # Media probing, filmstrip and waveform generation
+│   │   ├── playback.py         # FFmpeg-driven audio/video preview engine
 │   │   └── worker.py           # Background FFmpeg thread (all tasks)
 │   └── ui/                     # Presentation layer
-│       ├── icons.py            # Font Awesome icon helpers
+│       ├── icons.py            # Theme-aware Phosphor icons (qtawesome)
 │       ├── theme.py            # Light/dark palettes + stylesheet
-│       ├── widgets.py          # Reusable form widgets
-│       ├── timeline.py         # Scrubbable trim timeline
-│       ├── trim_studio.py      # Media-player trim page
+│       ├── dnd.py              # Drag-and-drop helpers
+│       ├── widgets.py          # Layouts, source picker, form controls
+│       ├── timeline.py         # Zoomable trim timeline
+│       ├── video_view.py       # Preview surface
+│       ├── trim_studio.py      # Trim & preview page
 │       └── main_window.py      # Main window
 ├── build.bat                   # Local build script
 ├── icon.ico                    # Application icon
