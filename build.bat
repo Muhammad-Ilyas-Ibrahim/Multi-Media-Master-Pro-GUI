@@ -1,6 +1,6 @@
 @echo off
 REM ============================================================
-REM  Multi-Media-Master-Pro v1.3 - GUI build script
+REM  Multi-Media-Master-Pro v2.0 - GUI build script
 REM  Produces dist\MultiMediaMasterPro\MultiMediaMasterPro.exe
 REM ============================================================
 setlocal

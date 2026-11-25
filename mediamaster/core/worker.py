@@ -96,7 +96,7 @@ class Worker(QThread):
     # -- tasks ------------------------------------------------------------ #
     def compress_video(self):
         inp = self.p['input']; level = self.p['level']
-        ext = self.p.get('ext') or os.path.splitext(inp)[1].lstrip('.')
+        ext = self.p.get('ext') or config.output_ext(config.ext_of(inp), 'video')
         self.status.emit("Analyzing video..."); self.progress.emit(4)
         original = config.file_size_kb(inp); dur = self._duration(inp)
         d, name = os.path.split(inp); stem = os.path.splitext(name)[0]
@@ -124,7 +124,7 @@ class Worker(QThread):
 
     def compress_image(self):
         inp = self.p['input']; level = self.p['level']
-        ext = self.p.get('ext') or os.path.splitext(inp)[1].lstrip('.')
+        ext = self.p.get('ext') or config.output_ext(config.ext_of(inp), 'image')
         original = config.file_size_kb(inp)
         d, name = os.path.split(inp); stem = os.path.splitext(name)[0]
         suffix = {1: "_q_high", 2: "_compressed", 3: "_q_low"}[level]
@@ -145,6 +145,18 @@ class Worker(QThread):
     def compress_images(self):
         self._batch_compress(config.IMAGE_EXTS, is_video=False)
 
+    @staticmethod
+    def _batch_dst(out_dir, fname, ext, used):
+        """Output path for one file of a batch. Two sources that would map to
+        the same name (clip.rm and clip.vob -> clip.mp4) keep their original
+        format in the name instead of overwriting each other."""
+        stem, src_ext = os.path.splitext(fname)
+        name = f"{stem}.{ext}"
+        if name.lower() in used:
+            name = f"{stem}_{src_ext.lstrip('.').lower()}.{ext}"
+        used.add(name.lower())
+        return os.path.join(out_dir, name)
+
     def _batch_compress(self, exts, is_video):
         folder = self.p['input']; level = self.p['level']; new_ext = self.p.get('ext')
         files = [f for f in os.listdir(folder)
@@ -157,12 +169,14 @@ class Worker(QThread):
         with open(csv_path, 'w', newline='') as cf:
             w = csv.writer(cf)
             w.writerow(['File', 'Original (KB)', 'Compressed (KB)', 'Reduction (%)'])
+            used = set()
             for i, fname in enumerate(files):
                 if self._cancel:
                     self.failed.emit("Cancelled."); return
                 src = os.path.join(folder, fname); stem = os.path.splitext(fname)[0]
-                ext = new_ext or os.path.splitext(fname)[1].lstrip('.')
-                dst = os.path.join(out_dir, f"{stem}.{ext}"); orig = config.file_size_kb(src)
+                ext = new_ext or config.output_ext(config.ext_of(fname),
+                                                   'video' if is_video else 'image')
+                dst = self._batch_dst(out_dir, fname, ext, used); orig = config.file_size_kb(src)
                 base = int(i / total * 100); span = int(1 / total * 100)
                 self.status.emit(f"Processing {i+1}/{total}: {fname}")
                 if is_video:
@@ -195,10 +209,11 @@ class Worker(QThread):
             if not files:
                 self.failed.emit("No video files found in that folder."); return
             out_dir = inp.rstrip('/\\') + "_audio"; os.makedirs(out_dir, exist_ok=True); total = len(files)
+            used = set()
             for i, fname in enumerate(files):
                 if self._cancel:
                     self.failed.emit("Cancelled."); return
-                src = os.path.join(inp, fname); dst = os.path.join(out_dir, os.path.splitext(fname)[0] + '.mp3')
+                src = os.path.join(inp, fname); dst = self._batch_dst(out_dir, fname, 'mp3', used)
                 self.status.emit(f"Extracting {i+1}/{total}: {fname}")
                 base = int(i / total * 100); span = int(1 / total * 100)
                 self._run([config.FFMPEG, '-i', src, '-q:a', '0', '-map', 'a', '-y', dst],
@@ -223,10 +238,11 @@ class Worker(QThread):
             if not files:
                 self.failed.emit("No matching files found in that folder."); return
             out_dir = inp.rstrip('/\\') + f"_{ext}"; os.makedirs(out_dir, exist_ok=True); total = len(files)
+            used = set()
             for i, fname in enumerate(files):
                 if self._cancel:
                     self.failed.emit("Cancelled."); return
-                src = os.path.join(inp, fname); dst = os.path.join(out_dir, os.path.splitext(fname)[0] + f'.{ext}')
+                src = os.path.join(inp, fname); dst = self._batch_dst(out_dir, fname, ext, used)
                 self.status.emit(f"Converting {i+1}/{total}: {fname}")
                 base = int(i / total * 100); span = int(1 / total * 100)
                 dur = self._duration(src) if kind == 'audio' else 0
@@ -236,39 +252,131 @@ class Worker(QThread):
             self.progress.emit(100)
             self.done.emit(f"Converted {total} file(s) to .{ext}.\n\nSaved to:\n{out_dir}", out_dir)
 
+    # Encoder choices per output container, used when a trim is re-encoded.
+    _AUDIO_CODECS = {
+        'mp3': ['-c:a', 'libmp3lame', '-q:a', '2'],
+        'wav': ['-c:a', 'pcm_s16le'],
+        'flac': ['-c:a', 'flac'],
+        'm4a': ['-c:a', 'aac', '-b:a', '192k'],
+        'm4b': ['-c:a', 'aac', '-b:a', '192k'],
+        'aac': ['-c:a', 'aac', '-b:a', '192k'],
+        'ogg': ['-c:a', 'libvorbis', '-q:a', '5'],
+        'oga': ['-c:a', 'libvorbis', '-q:a', '5'],
+        'opus': ['-c:a', 'libopus', '-b:a', '160k'],
+        'wma': ['-c:a', 'wmav2', '-b:a', '192k'],
+        'aiff': ['-c:a', 'pcm_s16be'],
+        'mka': ['-c:a', 'flac'],
+        'aif': ['-c:a', 'pcm_s16be'],
+    }
+    _VIDEO_CODECS = {
+        'webm': ['-c:v', 'libvpx-vp9', '-crf', '32', '-b:v', '0', '-row-mt', '1',
+                 '-deadline', 'good', '-cpu-used', '4', '-c:a', 'libopus', '-b:a', '128k'],
+        'avi': ['-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18',
+                '-pix_fmt', 'yuv420p', '-c:a', 'libmp3lame', '-q:a', '2'],
+        'wmv': ['-c:v', 'wmv2', '-q:v', '3', '-c:a', 'wmav2', '-b:a', '192k'],
+        'mpg': ['-c:v', 'mpeg2video', '-q:v', '3', '-c:a', 'mp2', '-b:a', '192k'],
+        'mpeg': ['-c:v', 'mpeg2video', '-q:v', '3', '-c:a', 'mp2', '-b:a', '192k'],
+        'flv': ['-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18',
+                '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k'],
+    }
+    _H264_AAC = ['-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18',
+                 '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k']
+
     def trim_media(self):
+        """Cut [start_ms, end_ms] out of a video or audio file.
+
+        params:
+            input       source path
+            start_ms    in point
+            end_ms      out point
+            precise     re-encode for a frame-exact cut (else stream copy)
+            out_ext     target extension, or None to keep the source's
+            audio_only  drop the picture (e.g. export a clip's sound as MP3)
+        """
         inp = self.p['input']
-        start = self.p.get('start') or "00:00:00.000"
-        end = self.p.get('end')                 # may be None -> to end of file
-        reencode = bool(self.p.get('reencode', False))
-        d, name = os.path.split(inp); stem, ext = os.path.splitext(name)
-        out = os.path.join(d, f"{stem}_trimmed{ext}")
+        start_ms = max(0, int(self.p.get('start_ms', 0)))
+        end_ms = int(self.p.get('end_ms', 0))
+        audio_only = bool(self.p.get('audio_only', False))
+        src_ext = os.path.splitext(inp)[1].lstrip('.').lower()
+        precise = bool(self.p.get('precise', False))
+        out_ext = (self.p.get('out_ext') or '').lower()
+        if not out_ext:
+            kind = config.kind_of_ext(src_ext) or ('video' if self.p.get('has_video', True) else 'audio')
+            if kind == 'image':
+                kind = 'video'
+            writable = config.WRITABLE_VIDEO if kind == 'video' else config.WRITABLE_AUDIO
+            if src_ext in writable:
+                out_ext = src_ext
+            elif precise:
+                out_ext = 'mp4' if kind == 'video' else 'mp3'
+            else:
+                # Matroska can hold almost any codec, so a lossless copy of a
+                # file whose own container FFmpeg can't write still works.
+                out_ext = 'mkv' if kind == 'video' else 'mka'
+        # A container change can't be stream-copied reliably, so encode it.
+        same_family = out_ext == src_ext or (out_ext in ('mkv', 'mka') and not self.p.get('out_ext'))
+        precise = precise or not same_family or audio_only
 
-        s_sec = config.hhmmss_to_sec(start)
-        e_sec = config.hhmmss_to_sec(end) if end else 0.0
-        dur = max(0.0, e_sec - s_sec) if end else 0.0
+        d, name = os.path.split(inp); stem = os.path.splitext(name)[0]
+        out = config.unique_path(os.path.join(d, f"{stem}_trimmed.{out_ext}"))
+        dur = max(0.0, (end_ms - start_ms) / 1000.0)
+        if dur <= 0:
+            self.failed.emit("The trim range is empty."); return
 
-        if reencode:
-            # Accurate: decode then seek/cut, re-encode.
-            cmd = [config.FFMPEG, '-i', inp, '-ss', start]
-            if end:
-                cmd += ['-to', end]
-            cmd += ['-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18',
-                    '-c:a', 'aac', '-y', out]
-            self.status.emit("Trimming (precise re-encode)...")
-        else:
-            # Fast: stream copy. -ss before -i for quick seek, -t for duration.
-            cmd = [config.FFMPEG, '-ss', start, '-i', inp]
-            if end and dur > 0:
-                cmd += ['-t', f"{dur:.3f}"]
-            cmd += ['-c', 'copy', '-avoid_negative_ts', 'make_zero', '-y', out]
-            self.status.emit("Trimming (fast copy)...")
+        def build(precise, out_ext, out):
+            cmd = [config.FFMPEG, '-hide_banner', '-nostdin',
+                   '-ss', f"{start_ms / 1000.0:.3f}", '-i', inp, '-t', f"{dur:.3f}"]
+            is_audio_target = audio_only or (out_ext in config.AUDIO_EXTS
+                                             and out_ext not in config.VIDEO_EXTS)
+            if precise:
+                if is_audio_target:
+                    cmd += ['-vn', '-sn', '-dn'] + self._AUDIO_CODECS.get(out_ext, [])
+                else:
+                    cmd += ['-sn', '-dn'] + self._VIDEO_CODECS.get(out_ext, self._H264_AAC)
+                    if out_ext in ('mp4', 'm4v', 'mov'):
+                        cmd += ['-movflags', '+faststart']
+            else:
+                # Input-side -ss seeks to the keyframe at/before the in point.
+                cmd += ['-map', '0:v?', '-map', '0:a?', '-c', 'copy',
+                        '-avoid_negative_ts', 'make_zero']
+            return cmd + ['-map_metadata', '0', '-y', out]
 
-        self.progress.emit(10)
-        rc = self._run(cmd, dur, 10, 88)
+        def attempt(precise, out_ext, out):
+            self.status.emit("Trimming (precise re-encode)..." if precise
+                             else "Trimming (fast copy)...")
+            cmd = build(precise, out_ext, out)
+            self.log.emit(" ".join(f'"{c}"' if ' ' in c else c for c in cmd))
+            rc = self._run(cmd, dur, 5, 93)
+            ok = rc == 0 and os.path.exists(out) and os.path.getsize(out) > 0
+            if not ok:
+                self._discard(out)
+            return ok
+
+        self.progress.emit(5)
+        ok = attempt(precise, out_ext, out)
+        if not ok and not precise and not self._cancel:
+            # Some codecs (old RealMedia, game formats, ...) can't be copied into
+            # any container FFmpeg writes. Re-encode instead of giving up.
+            self.log.emit("Fast copy isn't possible for this file; re-encoding instead.")
+            if not self.p.get('out_ext'):
+                kind_video = out_ext in config.VIDEO_EXTS
+                if out_ext in ('mkv', 'mka'):
+                    out_ext = 'mp4' if kind_video else 'mp3'
+                    out = config.unique_path(os.path.join(d, f"{stem}_trimmed.{out_ext}"))
+            self.progress.emit(5)
+            ok = attempt(True, out_ext, out)
         if self._cancel:
+            self._discard(out)
             self.failed.emit("Cancelled."); return
-        if rc != 0:
-            self.failed.emit("FFmpeg failed to trim. Check the in/out points."); return
+        if not ok:
+            self.failed.emit("FFmpeg could not trim this file. Open the log for details."); return
         self.progress.emit(100)
-        self.done.emit(f"Trimmed successfully.\n\nSaved to:\n{out}", out)
+        self.done.emit(f"Clip saved ({config.fmt_duration(end_ms - start_ms)}).\n\nSaved to:\n{out}", out)
+
+    @staticmethod
+    def _discard(path):
+        try:
+            if os.path.exists(path):
+                os.remove(path)
+        except OSError:
+            pass
